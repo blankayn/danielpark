@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daniel Park</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1a1a2e;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden;
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            background: #e83e5a;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .bg-gradient {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 30% 50%, #ff6b7a 0%, #e83e5a 50%, #c92a4a 100%);
+            animation: bgShift 8s ease-in-out infinite;
+        }
+
+        @keyframes bgShift {
+            0%, 100% { filter: hue-rotate(0deg) brightness(1); }
+            50% { filter: hue-rotate(5deg) brightness(1.05); }
+        }
+
+        .character-wrapper {
+            position: absolute;
+            top: 5%;
+            right: -2%;
+            transform: none;
+            height: 90vh;
+            width: auto;
+            max-width: 65%;
+            animation: breathe 6s ease-in-out infinite;
+            z-index: 2;
+        }
+
+        /* Mobile character positioning */
+        @media (max-width: 768px) {
+            .character-wrapper {
+                top: 40%;
+                right: 1%;
+                transform: none;
+                height: 55vh;
+                max-width: 70%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .character-wrapper {
+                top: 45%;
+                right: 15%;
+                height: 45vh;
+                max-width: 65%;
+            }
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: scale(1) translateY(0); }
+            40% { transform: scale(1.008) translateY(-3px); }
+            60% { transform: scale(1.008) translateY(-3px); }
+        }
+
+        .character {
+            height: 100%;
+            width: auto;
+            max-width: 100%;
+            object-fit: contain;
+            object-position: center bottom;
+            filter: drop-shadow(0 10px 40px rgba(0,0,0,0.3));
+            pointer-events: none;
+            display: block;
+        }
+
+        .breath-container {
+            position: absolute;
+            right: 1%;
+            top: 36%;
+            width: 300px;
+            height: 200px;
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        /* Mobile breath positioning */
+        @media (max-width: 768px) {
+            .breath-container {
+                right: 35%;
+                top: 58%;
+                width: 200px;
+            }
+        }
+
+        .particle {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.35) 40%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(8px);
+            opacity: 0;
+            animation: particleFloat 3s ease-out infinite;
+        }
+
+        .particle:nth-child(1) { animation-delay: 0s; }
+        .particle:nth-child(2) { animation-delay: 0.6s; }
+        .particle:nth-child(3) { animation-delay: 1.2s; }
+        .particle:nth-child(4) { animation-delay: 1.8s; }
+        .particle:nth-child(5) { animation-delay: 2.4s; }
+
+        @keyframes particleFloat {
+            0% { transform: translate(0, -50%) scale(0.3); opacity: 0; }
+            10% { opacity: 0.8; }
+            100% { transform: translate(-200px, -50%) scale(2.5); opacity: 0; }
+        }
+
+        .wisp-container {
+            position: absolute;
+            right: 40%;
+            top: 40%;
+            width: 300px;
+            height: 100px;
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        /* Mobile wisp positioning */
+        @media (max-width: 768px) {
+            .wisp-container {
+                right: 37%;
+                top: 56%;
+                width: 200px;
+            }
+        }
+
+        .wisp {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 100px;
+            height: 25px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+            filter: blur(12px);
+            border-radius: 50%;
+            opacity: 0;
+            animation: wispFlow 2.5s ease-out infinite;
+        }
+
+        .wisp:nth-child(1) { animation-delay: 0s; top: 45%; }
+        .wisp:nth-child(2) { animation-delay: 0.8s; top: 55%; }
+        .wisp:nth-child(3) { animation-delay: 1.6s; top: 50%; }
+
+        @keyframes wispFlow {
+            0% { transform: translateX(0) scaleX(0.5); opacity: 0; }
+            20% { opacity: 0.6; }
+            100% { transform: translateX(-220px) scaleX(2); opacity: 0; }
+        }
+
+        .vignette {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.2) 100%);
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: #1a1a2e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(232, 62, 90, 0.2);
+            border-top-color: #e83e5a;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .title-text {
+            position: absolute;
+            left: 5%;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 4rem;
+            font-weight: 900;
+            color: rgba(255,255,255,0.9);
+            text-shadow: 0 0 20px rgba(255,255,255,0.3);
+            letter-spacing: 0.1em;
+            z-index: 4;
+            overflow: hidden;
+        }
+
+        .title-text .char {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(100px) rotateX(-90deg);
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .title-text {
+                left: 50%;
+                top: 15%;
+                transform: translateX(-50%);
+                font-size: 2rem;
+                text-align: center;
+                width: 90%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .title-text {
+                font-size: 1.8rem;
+                top: 12%;
+            }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay" id="loader">
+        <div class="loader"></div>
+    </div>
+
+    <div class="container" id="container">
+        <div class="bg-gradient"></div>
+        <div class="vignette"></div>
+
+        <div class="breath-container">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+
+        <div class="wisp-container">
+            <div class="wisp"></div>
+            <div class="wisp"></div>
+            <div class="wisp"></div>
+        </div>
+
+        <div class="character-wrapper" id="charWrapper">
+            <img src="assets/daniel park.png" 
+                 alt="Daniel Park" 
+                 class="character"
+                 id="characterImg">
+        </div>
+
+        <div class="title-text" id="titleText">
+            <span class="char">D</span>
+            <span class="char">A</span>
+            <span class="char">N</span>
+            <span class="char">I</span>
+            <span class="char">E</span>
+            <span class="char">L</span>
+            <span class="char">&nbsp;</span>
+            <span class="char">P</span>
+            <span class="char">A</span>
+            <span class="char">R</span>
+            <span class="char">K</span>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loader').classList.add('hidden');
+                
+                // GSAP Text Animation with responsive positioning
+                gsap.matchMedia().add({
+                    isDesktop: "(min-width: 769px)",
+                    isMobile: "(max-width: 768px)",
+                    reduceMotion: "(prefers-reduced-motion: reduce)"
+                }, (context) => {
+                    const { isDesktop, isMobile, reduceMotion } = context.conditions;
+                    const chars = document.querySelectorAll('.title-text .char');
+                    
+                    if (!reduceMotion) {
+                        gsap.to(chars, {
+                            opacity: 1,
+                            y: 0,
+                            rotationX: 0,
+                            duration: reduceMotion ? 0 : 0.8,
+                            ease: "back.out(1.7)",
+                            stagger: reduceMotion ? 0 : 0.1,
+                            delay: reduceMotion ? 0 : 0.5
+                        });
+                        
+                        // Floating animation
+                        gsap.to('.title-text', {
+                            y: isMobile ? -5 : -10,
+                            duration: 3,
+                            ease: "power1.inOut",
+                            yoyo: true,
+                            repeat: -1
+                        });
+                    } else {
+                        // Just show text immediately for reduced motion
+                        gsap.set(chars, { opacity: 1, y: 0, rotationX: 0 });
+                    }
+                });
+            }, 500);
+        });
+
+        const container = document.getElementById('container');
+        const wrapper = document.getElementById('charWrapper');
+
+        container.addEventListener('mousemove', (e) => {
+            const rect = container.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width - 0.5;
+            const y = (e.clientY - rect.top) / rect.height - 0.5;
+            wrapper.style.transform = `translate(${x * 12}px, ${y * 6}px)`;
+        });
+
+        container.addEventListener('mouseleave', () => {
+            wrapper.style.transform = 'none';
+        });
+
+        let intenseMode = false;
+        container.addEventListener('click', () => {
+            intenseMode = !intenseMode;
+            const particles = document.querySelectorAll('.particle');
+            const wisps = document.querySelectorAll('.wisp');
+
+            particles.forEach(p => { p.style.animationDuration = intenseMode ? '1.5s' : '3s'; });
+            wisps.forEach(w => { w.style.animationDuration = intenseMode ? '1.2s' : '2.5s'; });
+            wrapper.style.animationDuration = intenseMode ? '2.5s' : '6s';
+        });
+    </script>
+</body>
+</html>
