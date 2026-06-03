@@ -235,10 +235,10 @@
         .social-links {
             position: absolute;
             left: 5%;
-            top: 65%;
+            top: calc(50% + 96px);
             display: flex;
             gap: 20px;
-            z-index: 4;
+            z-index: 10;
         }
 
         .social-link {
@@ -257,6 +257,15 @@
             transition: all 0.3s ease;
             opacity: 1;
             transform: translateY(0);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+        }
+
+        .social-link svg {
+            display: block;
+            width: 22px;
+            height: 22px;
+            flex: 0 0 auto;
+            overflow: visible;
         }
 
         .social-link:hover {
@@ -273,19 +282,25 @@
         /* Mobile responsiveness */
         @media (max-width: 768px) {
             .title-text {
-                left: 50%;
-                top: 15%;
-                transform: translateX(-50%);
-                font-size: 2rem;
+                left: 16px;
+                right: 16px;
+                top: 12%;
+                transform: none;
+                width: auto;
+                font-size: 1.9rem;
                 text-align: center;
-                width: 90%;
+                letter-spacing: 0.08em;
+                white-space: nowrap;
+                overflow: visible;
             }
             
             .social-links {
-                left: 50%;
-                top: 28%;
-                transform: translateX(-50%);
+                left: 0;
+                right: 0;
+                top: calc(12% + 72px);
+                transform: none;
                 justify-content: center;
+                gap: 18px;
             }
             
             .social-link {
@@ -297,8 +312,24 @@
 
         @media (max-width: 480px) {
             .title-text {
-                font-size: 1.8rem;
-                top: 12%;
+                left: 12px;
+                right: 12px;
+                font-size: 1.4rem;
+            }
+
+            .social-links {
+                top: calc(12% + 62px);
+                gap: 14px;
+            }
+
+            .social-link {
+                width: 42px;
+                height: 42px;
+            }
+
+            .social-link svg {
+                width: 20px;
+                height: 20px;
             }
         }
 
@@ -353,13 +384,13 @@
 
         <div class="social-links" id="socialLinks">
             <!-- Facebook -->
-            <a href="https://facebook.com/kirtdenielmagno" target="_blank" class="social-link facebook" title="Facebook">
+            <a href="https://facebook.com/kirtdenielnmagno" target="_blank" class="social-link facebook" title="Facebook">
                 <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="white">
                     <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
                 </svg>
             </a>
             <!-- Instagram -->
-            <a href="https://instagram.com/chesnot8" target="_blank" class="social-link instagram" title="Instagram">
+            <a href="https://instagram.com/chesknot8" target="_blank" class="social-link instagram" title="Instagram">
                 <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
                     <circle cx="12" cy="12" r="4"/>
@@ -384,32 +415,41 @@
                 const socialLinks = document.querySelectorAll('.social-link');
                 const isMobile = window.innerWidth <= 768;
                 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                const titleStartY = isMobile ? 36 : 100;
+                const titleStartRotation = isMobile ? -45 : -90;
+                const titleDuration = isMobile ? 0.5 : 0.8;
+                const titleStagger = isMobile ? 0.04 : 0.1;
+                const titleDelay = isMobile ? 0.25 : 0.5;
+                const socialStartOpacity = isMobile ? 1 : 0;
+                const socialStartY = isMobile ? 12 : 30;
+                const socialDuration = isMobile ? 0.35 : 0.6;
+                const socialDelay = isMobile ? 0.45 : 1.2;
 
-                if (!reduceMotion) {
+                if (!reduceMotion && window.gsap) {
                     // Animate title chars in
                     gsap.fromTo(chars,
-                        { opacity: 0, y: 100, rotationX: -90 },
+                        { opacity: 0, y: titleStartY, rotationX: titleStartRotation },
                         {
                             opacity: 1,
                             y: 0,
                             rotationX: 0,
-                            duration: 0.8,
+                            duration: titleDuration,
                             ease: "back.out(1.7)",
-                            stagger: 0.1,
-                            delay: 0.5
+                            stagger: titleStagger,
+                            delay: titleDelay
                         }
                     );
 
                     // Animate social icons in
                     gsap.fromTo(socialLinks,
-                        { opacity: 0, y: 30 },
+                        { opacity: socialStartOpacity, y: socialStartY },
                         {
                             opacity: 1,
                             y: 0,
-                            duration: 0.6,
+                            duration: socialDuration,
                             ease: "power2.out",
                             stagger: 0.1,
-                            delay: 1.2
+                            delay: socialDelay
                         }
                     );
 
@@ -422,8 +462,14 @@
                         repeat: -1
                     });
                 } else {
-                    gsap.set(chars, { opacity: 1, y: 0, rotationX: 0 });
-                    gsap.set(socialLinks, { opacity: 1, y: 0 });
+                    chars.forEach(char => {
+                        char.style.opacity = '1';
+                        char.style.transform = 'translateY(0) rotateX(0)';
+                    });
+                    socialLinks.forEach(link => {
+                        link.style.opacity = '1';
+                        link.style.transform = 'translateY(0)';
+                    });
                 }
             }, 500);
         });
